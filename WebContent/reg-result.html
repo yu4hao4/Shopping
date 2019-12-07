@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>易买网 - 注册</title>
+<link type="text/css" rel="stylesheet" href="css/style.css" />
+<script type="text/javascript" src="scripts/myfunction.js"></script>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+</head>
+<body>
+<div id="header" class="wrap">
+	<div id="logo"><img src="images/logo.gif" /></div>
+	<div class="help"></div>
+	<div class="navbar">
+		<ul class="clearfix">
+			<li class="current"><a href="index.html">首页</a></li>
+			<li class="nav_1"><a href="javascript:void(0);"  id="1"  onclick="bignav(this.id)">图书</a></li>
+			<li class="nav_2"><a href="javascript:void(0);"  id="2"  onclick="bignav(this.id)">百货</a></li>
+			<li class="nav_3"><a href="javascript:void(0);"  id="3"  onclick="bignav(this.id)">家居</a></li>
+			<li class="nav_4"><a href="javascript:void(0);"  id="4"  onclick="bignav(this.id)">食物</a></li>
+		</ul>
+	</div>
+</div>
+<div id="childNav">
+	<div class="wrap">
+		<ul class="clearfix" id="nav">
+		</ul>
+	</div>
+</div>
+<div id="register" class="wrap">
+	<div class="shadow">
+		<em class="corner lb"></em>
+		<em class="corner rt"></em>
+		<div class="box">
+			<h1>欢迎注册易买网</h1>
+			<ul class="steps clearfix">
+				<li class="finished"><em></em>填写注册信息</li>
+				<li class="last-current"><em></em>注册成功</li>
+			</ul>
+			<div class="msg">
+				<p>恭喜：注册成功！</p>
+				<p>正在进入首页...</p>
+				<script type="text/javascript">
+					setTimeout("location.href='index.html'", 3000);
+				</script>
+			</div>
+		</div>
+	</div>
+</div>
+<div id="footer">
+	Copyright &copy; 2010 安博教育 All Rights Reserved. 京ICP证1000001号
+</div>
+</body>
+<script>
+	//加载
+		$(function() {
+			getnav(); //获取栏目
+		})
+		
+	//登陆信息
+	var user = sessionStorage.getItem("User");
+	if(user==null)
+			{
+				var target = $('.help');
+				var str = '<a href="shopping.html" class="shopping">购物车</a>'+
+				'<a href="login.html">登录</a>'+
+				'<a href="register.html">注册</a>'+
+				'<a href="guestbook.html">留言</a>';
+				target.append(str);
+			}else{
+				var name = JSON.parse(user).userName;
+				var target = $('.help');
+				var str = '<lable>'+
+					name + '</lable><button onclick="out()">登出</button>';
+				target.append(str);
+				
+				alert("登录状态下无法注册！！"); 
+				setTimeout(function(){//一秒后跳转
+					 location.href="index.html";
+				},1000);
+			}
+</script>
+</html>

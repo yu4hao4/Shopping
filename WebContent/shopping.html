@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>易买网 - 购物车</title>
+<link type="text/css" rel="stylesheet" href="css/style.css" />
+<script type="text/javascript" src="scripts/function.js"></script>
+<script type="text/javascript" src="scripts/myfunction.js"></script>
+<script type="text/javascript" src="js/jquery.min.js" ></script>
+</head>
+<body>
+<div id="header" class="wrap">
+	<div id="logo"><img src="images/logo.gif" /></div>
+	<div class="help">
+	</div>
+	<div class="navbar">
+		<ul class="clearfix">
+			<li class="current"><a href="index.html">首页</a></li>
+			<li class="nav_1"><a href="javascript:void(0);"  id="1"  onclick="bignav(this.id)">图书</a></li>
+			<li class="nav_2"><a href="javascript:void(0);"  id="2"  onclick="bignav(this.id)">百货</a></li>
+			<li class="nav_3"><a href="javascript:void(0);"  id="3"  onclick="bignav(this.id)">家居</a></li>
+			<li class="nav_4"><a href="javascript:void(0);"  id="4"  onclick="bignav(this.id)">食物</a></li>
+		</ul>
+	</div>
+</div>
+<div id="childNav">
+	<div class="wrap">
+		<ul class="clearfix" id="nav">
+		</ul>
+	</div>
+</div>
+<div class="wrap">
+	<div id="shopping">
+			<table id="goods_id">
+				<tr>
+					<th>商品名称</th>
+					<th>商品单价</th>
+					<th>购买数量</th>
+					<th>操作</th>
+				</tr>
+			</table>
+			<div class="button"><input type="submit" value="" onclick="endshopping()" /></div>
+	</div>
+</div>
+<div id="footer">
+	Copyright &copy; 2010 安博教育 All Rights Reserved. 京ICP证1000001号
+</div>
+</body>
+<script>
+var U_NAME;//存放使用者姓名
+
+//加载
+$(function() {
+	getnav();//获取栏目
+})
+
+//登陆信息
+$(function() {
+	var user = sessionStorage.getItem("User");
+	if(user == null) {
+		alert("请先登录！");
+		location.href="login.html";
+	} else {
+		var name = JSON.parse(user).userName;
+		U_NAME = name;
+	}
+})
+	
+	
+	//从cookie中取出购物车
+	$(function() {
+		var customer = JSON.parse(getCookie(U_NAME));
+		//delCookie('thecookie');
+		if(customer!=null){
+			for(var row of customer){
+				var target = $('#goods_id');
+				var str = '<tr><td class="thumb"><img src="'+
+				row.goodsImg+'" style="width: 100px;height: 100px; /><a href="goodsView?id='+
+				row.goodsId+'" >'+
+				row.goodsName+'</a></td><td class="price"><span>￥'+
+				row.goodsPrice+'</span></td><td class="number"><dl><dt><input type="text" value="'+
+				row.goodsnumber+'"/></dt></dl></td><td class="delete"><a href="javascript:void(0);" onclick="delgoods('+
+				row.goodsId+')">删除</a></td></tr>';
+				target.append(str);
+			}
+		}
+	})
+	
+	//删除物品
+	function delgoods(id){
+		var customer = JSON.parse(getCookie(U_NAME));
+		for(var i=0;i<customer.length;i++){
+			var row = customer[i];
+			if(id==row.goodsId){//数组中存在
+				customer.splice(i,1);
+			}
+		}
+		setCookie(U_NAME,JSON.stringify(customer));
+		window.location.reload();
+	}
+	
+	//结算
+	function endshopping(){
+		delCookie(U_NAME);
+		location.href="shopping-result.html";
+	}
+	
+	//一级标题查找二级标签 一级标签：图书/百货/家居/食物
+function bignav(id) {
+	var target = $("#nav");
+	//清空二级标签
+	target.html("");
+	$(".current").removeClass('current');
+	var nav_big = '.nav_' + id;
+	$(nav_big).addClass('current');
+	var req = {};
+	req.id = id;
+	$.ajax({
+		type: "get",
+		url: "navFind",
+		data: req,
+		dataType: 'json',
+		success: function(resp) {
+			for(var row of resp) {
+				//上侧
+				var str = '<li><a href="goods-list?name=' +
+					row.navName + '">' +
+					row.navName + '</a></li>';
+				target.append(str);
+			}
+		}
+	});
+}
+</script>
+</html>

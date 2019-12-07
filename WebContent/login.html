@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>易买网 - 登录</title>
+		<link type="text/css" rel="stylesheet" href="css/style.css" />
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="scripts/myfunction.js"></script>
+		<style>
+			.code {
+				font-family: Arial;
+				font-style: italic;
+				color: Red;
+				border: 0;
+				padding: 2px 3px;
+				letter-spacing: 3px;
+				font-weight: bolder;
+			}
+		</style>
+	</head>
+
+	<body onload="createCode()">
+		<div id="header" class="wrap">
+			<div id="logo"><img src="images/logo.gif" /></div>
+			<div class="help">
+			</div>
+			<div class="navbar">
+				<ul class="clearfix">
+					<li class="current">
+						<a href="index.html">首页</a>
+					</li>
+					<li class="nav_1">
+						<a href="javascript:void(0);" id="1" onclick="bignav(this.id)">图书</a>
+					</li>
+					<li class="nav_2">
+						<a href="javascript:void(0);" id="2" onclick="bignav(this.id)">百货</a>
+					</li>
+					<li class="nav_3">
+						<a href="javascript:void(0);" id="3" onclick="bignav(this.id)">家居</a>
+					</li>
+					<li class="nav_4">
+						<a href="javascript:void(0);" id="4" onclick="bignav(this.id)">食物</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div id="childNav">
+			<div class="wrap">
+				<ul class="clearfix" id="nav">
+				</ul>
+			</div>
+		</div>
+		<div id="register" class="wrap">
+			<div class="shadow">
+				<em class="corner lb"></em>
+				<em class="corner rt"></em>
+				<div class="box">
+					<h1>欢迎回到易买网</h1>
+					<table>
+						<tr>
+							<td class="field">用户名：</td>
+							<td><input class="text" type="text" id="userName" name="userName" onfocus="FocusItem(this)" onblur="CheckItem(this);" /><span></span></td>
+						</tr>
+						<tr>
+							<td class="field">登录密码：</td>
+							<td><input class="text" type="password" id="passWord" name="passWord" onfocus="FocusItem(this)" onblur="CheckItem(this);" /><span></span></td>
+						</tr>
+						<tr>
+							<td class="field">验证码：</td>
+							<!--
+                        	<td><input class="text verycode" type="text" name="veryCode" onfocus="FocusItem(this)" onblur="CheckItem(this);" /><img id="veryCode" src="" /><span></span></td>
+                        -->
+							<td>
+								<input type="text" id="validCode" class="text verycode">
+								<input type="text" onClick="createCode()" readonly="readonly" id="checkCode" class="unchanged" style="width: 80px;cursor:pointer" />
+							</td>
+						</tr>
+						<tr>
+							<td></td>
+							<td><label class="ui-green"><input type="submit" name="submit" value="立即登录" onclick="validate()"/></label></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="clear"></div>
+		</div>
+		<div id="footer">
+			Copyright &copy; 2010 安博教育 All Rights Reserved. 京ICP证1000001号
+		</div>
+	</body>
+	<script>
+		//加载
+		$(function() {
+			getnav(); //获取栏目
+		})
+
+		//登陆信息
+		var user = sessionStorage.getItem("User");
+		if(user == null) {
+			var target = $('.help');
+			var str = '<a href="shopping.html" class="shopping">购物车</a>' +
+				'<a href="login.html">登录</a>' +
+				'<a href="register.html">注册</a>' +
+				'<a href="guestbook.html">留言</a>';
+			target.append(str);
+		} else {
+			var name = JSON.parse(user).userName;
+			var target = $('.help');
+			var str = '<lable>' +
+				name + '</lable><button onclick="out()">登出</button>';
+			target.append(str);
+
+			alert("请不要重复登陆！！");
+			setTimeout(function() { //一秒后跳转
+				location.href = "index.html";
+			}, 1000);
+		}
+
+		var code;
+
+		//验证码生成和刷新
+		function createCode() {
+			code = "";
+			var codeLength = 6; //验证码的长度   
+			var checkCode = document.getElementById("checkCode");
+			var selectChar = new Array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'); //所有候选组成验证码的字符，当然也可以用中文的      
+			for(var i = 0; i < codeLength; i++) {
+				var charIndex = Math.floor(Math.random() * 36);
+				code += selectChar[charIndex];
+			}
+			if(checkCode) {
+				checkCode.className = "code";
+				checkCode.value = code;
+				checkCode.blur();
+			}
+		}
+
+		function validate() {
+			var inputName = $('#userName').val().trim();
+			var inputPassword = $('#passWord').val().trim();
+			var inputcode = $('#validCode').val().trim();
+			if(inputName == 0) {
+				alert("请输入用户名！");
+			} else if(inputPassword == 0) {
+				alert("请输入密码！");
+			} else if(inputcode.length <= 0) {
+				alert("请输入验证码！");
+			} else if(inputcode.toUpperCase() != code) {
+				alert("验证码输入错误！");
+				createCode(); //刷新验证码 
+			} else {
+				submit();
+			}
+		}
+
+		function submit() {
+			var req = {};
+			req.userName = $('#userName').val().trim();
+			req.passWord = $('#passWord').val().trim();
+			$.ajax({
+				type: "post",
+				url: "Login",
+				data: req,
+				dataType: 'json',
+				success: function(resp) {
+					//var a = JSON.get("result")
+					if(resp.hasOwnProperty("result")) {
+						alert("登录失败！请检查账号是否正确");
+						window.location.reload();
+					} else {
+						sessionStorage.setItem("User", JSON.stringify(resp));
+						location.href = "index.html";
+					}
+				}
+			});
+		}
+
+		
+		//一级标题查找二级标签 一级标签：图书/百货/家居/食物
+function bignav(id) {
+	var target = $("#nav");
+	//清空二级标签
+	target.html("");
+	$(".current").removeClass('current');
+	var nav_big = '.nav_' + id;
+	$(nav_big).addClass('current');
+	var req = {};
+	req.id = id;
+	$.ajax({
+		type: "get",
+		url: "navFind",
+		data: req,
+		dataType: 'json',
+		success: function(resp) {
+			for(var row of resp) {
+				//上侧
+				var str = '<li><a href="goods-list?name=' +
+					row.navName + '">' +
+					row.navName + '</a></li>';
+				target.append(str);
+			}
+		}
+	});
+}
+	</script>
+
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>易买网 - 留言</title>
+<link type="text/css" rel="stylesheet" href="css/style.css" />
+<script type="text/javascript" src="scripts/myfunction.js"></script>
+<script type="text/javascript" src="js/jquery.min.js" ></script>
+</head>
+<body>
+<div id="header" class="wrap">
+	<div id="logo"><img src="images/logo.gif" /></div>
+	<div class="help"></div>
+	<div class="navbar">
+		<ul class="clearfix">
+			<li class="current"><a href="index.html">首页</a></li>
+			<li class="nav_1"><a href="javascript:void(0);"  id="1"  onclick="bignav(this.id)">图书</a></li>
+			<li class="nav_2"><a href="javascript:void(0);"  id="2"  onclick="bignav(this.id)">百货</a></li>
+			<li class="nav_3"><a href="javascript:void(0);"  id="3"  onclick="bignav(this.id)">家居</a></li>
+			<li class="nav_4"><a href="javascript:void(0);"  id="4"  onclick="bignav(this.id)">食物</a></li>
+		</ul>
+	</div>
+</div>
+<div id="childNav">
+	<div class="wrap">
+		<ul class="clearfix" id="nav">
+			
+		</ul>
+	</div>
+</div>
+<div id="main" class="wrap">
+	<div class="lefter">
+		<div class="box">
+			<h2>商品分类</h2>
+			<dl class="nav_left_1">
+				<dt>图书音像</dt>
+				<!--<dd><a href="product-list.html">图书</a></dd>-->
+			</dl>
+			<dl class="nav_left_2">
+				<dt>百货</dt>
+				<!--<dd><a href="product-list.html">运动健康</a></dd>-->
+			</dl>
+		</div>
+	</div>
+	<div class="main">
+		<div class="guestbook">
+			<h2>全部留言</h2>
+			<ul id="guestlist">
+				<!--<li>
+					<dl>
+						<dt>那个什么衣服贵吗</dt>
+						<dd class="author">网友：张三丰 <span class="timer">2010:10:10 20:00:01</span></dd>
+						<dd>不贵</dd>
+					</dl>
+				</li>-->
+			</ul>
+			<div class="clear"></div>
+			<div class="pager">
+				<ul class="clearfix" id="guestPager">
+				</ul>
+			</div>
+			<div id="reply-box">
+					<table>
+						<tr>
+							<td class="field">留言标题：</td>
+							<td><input class="text" type="text" id="guestTitle" maxlength="15"/></td>
+						</tr>
+						<tr>
+							<td class="field">留言内容：</td>
+							<td><textarea id="guestContent" maxlength="80"></textarea></td>
+						</tr>
+						<tr>
+							<td></td>
+							<td><label class="ui-blue"><input type="submit" value="提交留言" onclick="validate()"/></label></td>
+						</tr>
+					</table>
+			</div>
+		</div>
+	</div>
+	<div class="clear"></div>
+</div>
+<div id="footer">
+	Copyright &copy; 2010 安博教育 All Rights Reserved. 京ICP证1000001号
+</div>
+</body>
+<script>
+//加载
+$(function() {
+	getlogin();//获取登陆信息
+	getnav();//获取栏目
+})
+	
+	//获得留言页数
+	$(function() {
+		var target=$('#guestPager');
+		$.ajax({
+				type:"get",
+				url:"guestIndex",
+				dataType:'json',
+				success:function(resp){
+					var yeshu = resp.yeshu;
+					if(yeshu==1){
+						return;
+					}
+					for(var i=1;i<=yeshu;i++){
+						var str='<li><a href="javascript:find('+i+')">'+
+						i+'</a></li>';
+						target.append(str);
+					}
+				}
+			});
+	})
+	
+	//取出留言
+	$(function() {
+		var req={};
+		req.yeshu=1;
+		var target=$('#guestlist');
+		$.ajax({
+				type:"get",
+				url:"guestList",
+				data:req,
+				dataType:'json',
+				success:function(resp){
+					for(var row of resp){
+						var str = '<li><dl><dt>'+
+						row.guestTitle+'</dt><dd class="author">网友:'+
+						row.userName+'<span class="timer">'+
+						row.timeCreated+'</span></dd><dd>'+
+						row.reply+'</dd></dl></li>';
+						target.append(str);
+					}
+				}
+			});
+	})
+
+	//验证
+	function validate() {
+		var user = sessionStorage.getItem("User");
+		if(user == null) {
+			alert("请先登录！");
+			location.href="login.html";
+		}else{
+			var guestTitle = $('#guestTitle').val().trim();
+			var guestContent = $('#guestContent').val().trim();
+			if(guestTitle == 0) {
+				alert("请输入留言标题！");
+			}else {
+				submit();
+			}
+		}
+	}
+	
+	//提交
+	function submit(){
+		var req={};
+		req.guestTitle = $('#guestTitle').val().trim();
+		req.guestContent = $('#guestContent').val().trim();
+		$.ajax({
+				type:"get",
+				url:"guestBook",
+				data:req,
+				dataType:'json',
+				success:function(resp){
+					var flag = resp.result;
+					if(flag==true){
+						alert("提交成功！");
+						window.location.reload();
+					}else{
+						alert("提交失败");
+						window.location.reload();
+					}
+				}
+			});
+	}
+	
+	//一级标题查找二级标签 一级标签：图书/百货/家居/食物
+function bignav(id) {
+	var target = $("#nav");
+	//清空二级标签
+	target.html("");
+	$(".current").removeClass('current');
+	var nav_big = '.nav_' + id;
+	$(nav_big).addClass('current');
+	var req = {};
+	req.id = id;
+	$.ajax({
+		type: "get",
+		url: "navFind",
+		data: req,
+		dataType: 'json',
+		success: function(resp) {
+			for(var row of resp) {
+				//上侧
+				var str = '<li><a href="goods-list?name=' +
+					row.navName + '">' +
+					row.navName + '</a></li>';
+				target.append(str);
+			}
+		}
+	});
+}
+
+function find(yeshu){
+	var req={};
+		req.yeshu=yeshu;
+		var target=$('#guestlist');
+		target.html("");
+		$.ajax({
+				type:"get",
+				url:"guestList",
+				data:req,
+				dataType:'json',
+				success:function(resp){
+					for(var row of resp){
+						var str = '<li><dl><dt>'+
+						row.guestTitle+'</dt><dd class="author">网友:'+
+						row.userName+'<span class="timer">'+
+						row.timeCreated+'</span></dd><dd>'+
+						row.reply+'</dd></dl></li>';
+						target.append(str);
+					}
+				}
+			});	
+}
+</script>
+</html>
